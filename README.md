@@ -1,4 +1,4 @@
-1. Introduction 
+<img width="468" height="274" alt="image" src="https://github.com/user-attachments/assets/a8784229-d52d-46bb-8586-4a745e703229" />1. Introduction 
 Security Operations Centres (SOCs) exist to reduce cyber risk by continuously monitoring enterprise telemetry, detecting malicious behaviours, validating alerts, and coordinating incident response. A SOC relies on both visibility (log coverage and quality) and analytic capability (correlation rules, enrichment, and analyst investigation workflows). Splunk supports these needs by ingesting large-scale telemetry and providing flexible searching and correlation through the Search Processing Language (SPL).
 This assessment investigates the Boss of the SOC v3 (BOTSv3) dataset. BOTSv3 is a publicly available, pre-indexed security dataset and CTF platform created by Splunk that simulates an incident at a fictitious brewing company (“Frothly”). It contains multi-domain logs including cloud audit telemetry (O365), email telemetry (SMTP), endpoint telemetry (Sysmon and osquery), and identity activity (Windows Security). The dataset is designed to support investigation through the cyber kill chain, requiring analysts to identify attacker behaviours across multiple sources and answer guided questions using evidence-driven reasoning [1].
 
@@ -26,4 +26,11 @@ Using a standard lifecycle (Preparation → Detection & Analysis → Containment
 •	Practical response implications, even in a simulation: disabling malicious accounts, removing persistence, isolating hosts, and blocking IoCs.
 •	Lessons learned through improved SOC rules (e.g., correlation of 4720 followed by privileged group adds) [5].
 
+3. Installation & Data Preparation
+3.1 Environment setup evidence and SOC justification
+Splunk Enterprise was deployed using a virtual machine environment. VM-based deployment is appropriate in SOC training because it supports
+•	reproducibility (consistent versions/config),
+•	isolation (reduces risk to host system),
+•	snapshots (roll back to known good states),
+•	controlled access (local web UI and lab-only access).
 
