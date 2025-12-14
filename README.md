@@ -243,9 +243,9 @@ index=botsv3 sourcetype="WinEventLog:Security" EventCode=4720
 
 **Evidence**
 
-![Figure 8](images/figure-08.jpeg)
+![Figure 8](figure-08.jpeg)
 
-![Figure 9](images/figure-09.jpeg)
+![Figure 9](figure-09.jpeg)
 
 *Figure 8 and 9 show EventCode 4720 and account creation.*
 
