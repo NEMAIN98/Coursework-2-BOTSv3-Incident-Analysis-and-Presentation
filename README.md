@@ -59,8 +59,8 @@ controlled access (local web UI and lab-only access).
 
 **Evidence**
 
-![Figure 1](images/figure-01.jpeg)
+![Figure 1](figure-01.jpeg)
 
 *Figure 1 confirms the BotsV3 VM exists in Oracle VirtualBox.*
 
-![Figure 2](images/figure-02.jpeg)
+![Figure 2](figure-02.jpeg)
