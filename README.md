@@ -260,3 +260,164 @@ Escalation trigger: 4720 should be reviewed, especially outside change windows.
 Triage enrichment: identify the creating user, the host, and whether the account logs in later.
 
 Forms part of correlation logic with group membership escalation (Q6).
+
+## Q6 — Groups the Windows account was added to
+
+Answer - administrators,user
+
+**SPL used**
+
+```spl
+index=botsv3 sourcetype=WinEventLog:Security (EventCode=4728 OR EventCode=4732 OR EventCode=4756 OR EventCode=4729 OR EventCode=4733 OR EventCode=4757) svcvnc
+```
+
+**Evidence**
+
+![Figure 10](figure-10.jpeg)
+
+![Figure 11](figure-11.jpeg)
+
+![Figure 12](figure-12.jpeg)
+
+*Figure 10, 11 and 12 shows group membership activity related to svcvnc.*
+
+**Interpretation**
+
+Group membership change events are critical identity telemetry. Addition to Administrators indicates privilege escalation and the ability to perform high-impact actions (disable defenses, create services, dump credentials, etc.) [9].
+
+**SOC relevance**
+
+High severity escalation.
+
+Enables powerful correlation: “new account + admin membership” is rarely benign.
+
+Response action: disable account, remove from admin group, investigate hosts where membership was used.
+
+## Q7 — PID listening on port 1337
+
+Answer - 14356
+
+**SPL used**
+
+```spl
+index=botsv3 host=hoth sourcetype=osquery:results 1337 (listening OR LISTEN)
+| table _time columns.address columns.port columns.protocol columns.state columns.pid columns.process_name
+| sort - _time
+```
+
+**Evidence**
+
+![Figure 13](figure-13.jpeg)
+
+*Figure 13 shows port 1337 listening and the PID.*
+
+**Interpretation**
+
+Listening services on uncommon ports can indicate backdoors or attacker tooling. Binding to 0.0.0.0 increases exposure by accepting connections on all interfaces.
+
+**SOC relevance**
+
+Strong potential C2/persistence indicator.
+
+Next pivots: PID → binary path → hash → parent process.
+
+Detection opportunity: alert on new listening ports or unexpected services, particularly high-risk ports used by known tooling patterns.
+
+## Q8 — MD5 hash
+
+Answer - 586ef56f4d8963dd546163ac31c865d7
+
+**SPL used**
+
+```spl
+index=botsv3 sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" "<EventID>1</EventID>" Hashes MD5 host="FYODOR-L"
+NOT "C:\\Windows\\system32\\cmd.exe"
+NOT "C:\\Windows\\system32\\svchost.exe"
+NOT "C:\\Windows\\explorer.exe"
+NOT "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+NOT "C:\\Windows\\System32\\services.exe"
+NOT "C:\\Windows\\system32\\cleanmgr.exe"
+NOT "C:\\Windows\\Temp\\unziped\\lsof-master\\l\\explorer.exe"
+svcvnc
+```
+
+**Evidence**
+
+![Figure 14](figure-14.jpeg)
+
+*Figure 14 shows Sysmon process creation event and MD5.*
+
+**Interpretation**
+
+Hashes are practical IoCs for rapid scoping and containment. While MD5 is not collision-resistant, it is still widely used for fast matching and cross-referencing in many SOC workflows.
+
+**SOC relevance**
+
+Hunt: search for the MD5 across all Sysmon events and other telemetry.
+
+Block: EDR hash block (if policy allows) or application control.
+
+Enrich: lookup against threat intelligence to confirm known malware families (where applicable).
+
+## 4.1 Synthesis: Kill-chain narrative and timeline
+
+The combined answers support a coherent incident chain
+
+| Kill-chain phase | Evidence from Q1–Q8 | SOC conclusion |
+| --- | --- | --- |
+| Cloud anomaly / possible compromised identity | Suspicious O365 UA accessing objects (.lnk) | Early indicator of abnormal access pattern |
+| Delivery | Attachment hunting → macro-enabled XLSM | Likely phishing delivery path |
+| Execution | HxTsr.exe associated with XLSM chain | Payload execution suspected |
+| Persistence (Linux) | Root useradd → ilovedavidverve | Unauthorized local persistence |
+| Persistence (Windows) | 4720 → svcvnc created | Unauthorized identity persistence |
+| Privilege escalation | Added to Administrators | Elevated control confirms malicious intent |
+| C2/remote access | Port 1337 listening (PID 14356) | Potential backdoor or remote control channel |
+| IoC extraction | MD5 hash identified | Supports environment-wide scoping and blocking |
+
+This synthesis is important because it shows the SOC “thinking step”: the investigation is not just answering questions, but connecting them into an escalation-worthy incident narrative.
+
+# 5. Conclusion
+
+## 5.1 Conclusion
+
+This BOTSv3 Splunk investigation demonstrates SOC-style detection and incident analysis across cloud, email, endpoint, and identity sources. Findings show: (1) anomalous cloud access indicators via a rare User-Agent, (2) delivery via a macro-enabled spreadsheet, (3) execution evidence via a suspicious executable (HxTsr.exe), (4) persistence via unauthorized account creation on both Linux and Windows, (5) privilege escalation through Administrator group membership, (6) suspicious network behaviour through a listening service on port 1337, and (7) a confirmed MD5 IoC supporting scoping and containment. Together, these artefacts form a credible attacker kill-chain narrative and justify escalation in a real SOC setting.
+
+## 5.2 SOC detection and response improvements
+
+Correlation rule (high confidence)
+
+Trigger a notable event when EventCode 4720 (account created) is followed by 4728/4732/4756 (added to privileged group) within 30–60 minutes, and enrich with creating user + source host.
+
+Cloud anomaly detection
+
+Baseline known UA strings and flag rare UAs accessing SharePoint/OneDrive, especially when paired with unusual file types (e.g., .lnk) or sensitive folders.
+
+Endpoint behaviour detection
+
+Alert on Office macro-enabled documents spawning uncommon executables or command interpreters, using Sysmon process creation + parent/child relationships.
+
+Network hardening
+
+Monitor for new listening ports and services on endpoints, especially when bound to all interfaces. Use osquery or EDR telemetry to alert on uncommon ports (e.g., 1337).
+
+# References
+
+[1] Splunk, “Boss of the SOC (BOTS) Dataset Version 3,” GitHub, Mar. 26, 2022. Available: https://github.com/splunk/botsv3
+
+[2] A. Nelson, S. Rekhi, M. Souppaya, and K. Scarfone, “Incident Response Recommendations and Considerations for Cybersecurity Risk Management”:, NIST, Apr. 2025, doi: https://doi.org/10.6028/nist.sp.800-61r3. Available: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-61r3.pdf
+
+[3] P. Cichonski, T. Millar, T. Grance, and K. Scarfone, “Computer security incident handling guide,” Computer Security Incident Handling Guide, vol. 2, no. 2, Aug. 2021, doi: https://doi.org/10.6028/nist.sp.800-61r2. Available: https://nvlpubs.nist.gov/nistpubs/specialpublications/nist.sp.800-61r2.pdf
+
+[4] Microsoft Sysinternals, “Sysmon - Windows Sysinternals,” learn.microsoft.com, Jul. 23, 2024. Available: https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon
+
+[5] Microsoft, “4720(S) A user account was created. - Windows 10,” learn.microsoft.com, Sep. 07, 2021. Available: https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4720
+
+[6] Splunk Ink, “Splunk Docs,” Splunk.com, 2025. Available: https://help.splunk.com/en/splunk-enterprise/spl-search-reference/9.3/introduction/welcome-to-the-search-reference. [Accessed: Jan. 09, 2026]
+
+[7] Aliyefhemin, “Splunk’s Indispensable Role in Modern Security Operations Centers (SOC),” Medium, Jul. 14, 2025. Available: https://medium.com/@aliyefhemin/splunks-indispensable-role-in-modern-security-operations-centers-soc-fcdd4253b240. [Accessed: Jan. 09, 2026]
+
+[8] Walid_Elmorsy, “Microsoft 365 Compliance audit log activities via O365 Management API - Part 1,” TECHCOMMUNITY.MICROSOFT.COM, Nov. 12, 2021. Available: https://techcommunity.microsoft.com/blog/microsoft-security-blog/microsoft-365-compliance-audit-log-activities-via-o365-management-api---part-1/2957171. [Accessed: Jan. 09, 2026]
+
+[9] Microsoft, “Audit Security Group Management - Windows 10,” learn.microsoft.com, Sep. 06, 2021. Available: https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management
+
+[10] MITRE Corporation, “Create Account, Technique T1136 - Enterprise | MITRE ATT&CK®,” attack.mitre.org, Dec. 14, 2017. Available: https://attack.mitre.org/techniques/T1136/
