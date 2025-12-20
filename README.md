@@ -112,3 +112,65 @@ index=botsv3 sourcetype="osquery:results"
 Evidence of successful readiness
 
 The guided question screenshots (Figures 3–10) show events returned for each required sourcetype with meaningful fields displayed, indicating the dataset is usable for investigation.
+
+# 4. Guided Questions
+
+## Q1 — Suspicious User-Agent
+
+Answer
+Mozilla/5.0 (X11; U; Linux i686; ko-KP; rv: 19.1br) Gecko/20130508 Fedora/1.9.1-2.5.rs3.0 NaenaraBrowser/3.5b4
+
+**SPL used**
+
+```spl
+index=botsv3 sourcetype="ms:o365:management" SourceFileExtension=lnk
+```
+
+**Evidence**
+
+![Figure 3](figure-03.jpeg)
+
+*Figure 3 shows the O365 event and the UA string.*
+
+**Interpretation**
+
+Cloud audit logs indicate access to .lnk objects (shortcuts) within SharePoint/OneDrive. A UA string like NaenaraBrowser is atypical in corporate environments and can represent either attacker tooling, compromised credentials used from an unusual client, or an attempt to blend into unfamiliar UA patterns [8].
+
+**SOC relevance**
+
+Useful for anomaly detection: alert on rare UAs or unusual geographies for the same account.
+
+Enables triage pivots: UA → IP → account → accessed objects → time window.
+
+Supports incident scoping: identify whether the UA appears for multiple accounts or only a single compromised identity.
+
+## Q2 — Malicious attachment filename
+
+Answer
+Frothly-Brewery-Financial-Planning-FY2019-Draft.xlsm
+
+**SPL used**
+
+```spl
+index=botsv3 sourcetype="stream:smtp" "attach_filename{}"="Malware Alert Text.txt"
+```
+
+**Evidence**
+
+![Figure 4](figure-04.jpeg)
+
+![Figure 5](figure-05.jpeg)
+
+*Figure 4 and 5 shows SMTP attachment evidence.*
+
+**Interpretation**
+
+Email remains one of the most common attack vectors. The query targets attachment patterns and reveals a pathway toward the macro-enabled .xlsm file. Macro-enabled Office documents are often used for code execution via VBA macros or embedded scripts.
+
+**SOC relevance**
+
+Links to delivery in the kill chain.
+
+Drives response playbooks: attachment quarantine, user notification, and retroactive search (“who else received it?”).
+
+Triggers endpoint investigation to confirm whether the file was opened and executed.
