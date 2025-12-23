@@ -202,3 +202,31 @@ Enables threat hunting: search for HxTsr.exe across hosts and time windows.
 Supports containment: isolate the host exhibiting payload execution.
 
 Helps detection building: “Office document opened → unusual executable launched” rules are strong in real environments.
+
+## Q4 — Linux username created (persistence)
+
+Answer - ilovedavidverve
+
+**SPL used**
+
+```spl
+index=botsv3 host=hoth sourcetype="osquery:results" useradd "columns.owner_uid"=0
+```
+
+**Evidence**
+
+![Figure 7](figure-07.jpeg)
+
+*Figure 7 shows useradd executed with root privileges and the username.*
+
+**Interpretation**
+
+Attackers often establish persistence by creating a new local user on a compromised Linux host. The root context (uid=0) indicates either privilege escalation occurred earlier or the attacker already had privileged access [10].
+
+**SOC relevance**
+
+High-confidence persistence indicator: unauthorized account creation should be an alert.
+
+Drives incident response: remove account, review SSH/auth logs, examine sudo usage, and validate system binaries.
+
+Supports wider hunt: search for the same username or similar useradd patterns across other Linux hosts.
