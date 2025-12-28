@@ -42,3 +42,25 @@ Detection & Analysis via SPL pivots across sourcetypes to validate malicious int
 Practical response implications, even in a simulation: disabling malicious accounts, removing persistence, isolating hosts, and blocking IoCs.
 
 Lessons learned through improved SOC rules (e.g., correlation of 4720 followed by privileged group adds) [5].
+
+# 3. Installation & Data Preparation
+
+## 3.1 Environment setup evidence and SOC justification
+
+Splunk Enterprise was deployed using a virtual machine environment. VM-based deployment is appropriate in SOC training because it supports
+
+reproducibility (consistent versions/config),
+
+isolation (reduces risk to host system),
+
+snapshots (roll back to known good states),
+
+controlled access (local web UI and lab-only access).
+
+**Evidence**
+
+![Figure 1](images/figure-01.jpeg)
+
+*Figure 1 confirms the BotsV3 VM exists in Oracle VirtualBox.*
+
+![Figure 2](images/figure-02.jpeg)
