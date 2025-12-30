@@ -230,3 +230,33 @@ High-confidence persistence indicator: unauthorized account creation should be a
 Drives incident response: remove account, review SSH/auth logs, examine sudo usage, and validate system binaries.
 
 Supports wider hunt: search for the same username or similar useradd patterns across other Linux hosts.
+
+## Q5 — Windows account created
+
+Answer - svcvnc
+
+**SPL used**
+
+```spl
+index=botsv3 sourcetype="WinEventLog:Security" EventCode=4720
+```
+
+**Evidence**
+
+![Figure 8](images/figure-08.jpeg)
+
+![Figure 9](images/figure-09.jpeg)
+
+*Figure 8 and 9 show EventCode 4720 and account creation.*
+
+**Interpretation**
+
+Windows auditing event 4720 (“A user account was created”) is a strong security event when it occurs unexpectedly [4]. The name svcvnc resembles a service-related account, a common attacker strategy to reduce suspicion.
+
+**SOC relevance**
+
+Escalation trigger: 4720 should be reviewed, especially outside change windows.
+
+Triage enrichment: identify the creating user, the host, and whether the account logs in later.
+
+Forms part of correlation logic with group membership escalation (Q6).
