@@ -11,3 +11,34 @@ Demonstrate the use of Splunk in a SOC-style workflow for ingestion readiness an
 Answer BOTSv3 300-level guided questions Q1–Q8 using SPL and evidence.
 
 Interpret findings in incident-handling terms (detection → escalation → response actions and improvements).
+## Scope and assumptions
+
+This report is restricted to Q1–Q8 as the required question set.
+
+Evidence is drawn from Splunk searches and screenshots (Figures 1–1).
+
+The environment is a lab/learning setup; conclusions reflect simulated incident activity and are not verified with live host forensics.
+
+# 2. SOC Roles & Incident Handling Reflection
+
+A SOC commonly operates using role separation to scale its response capability
+
+Tier 1 (Triage / Monitoring) - reviews alerts, checks dashboards, validates whether activity is benign or suspicious, and performs initial pivots (user → host → time range → related indicators). Tier 1 aims to reduce noise and escalate only credible incidents.
+
+Tier 2 (Incident Investigation / Response) - confirms the incident, builds timelines across sources, determines scope and impact, identifies attacker TTPs, and recommends containment actions.
+
+Tier 3 (Threat Hunting / Detection Engineering) - develops correlation logic, tunes detections to reduce false positives, builds dashboards, and integrates intelligence (e.g., known bad hashes/user agents).
+
+BOTSv3 maps well to this structure. Several Q1–Q8 answers represent “Tier 1 signals” (unusual UA, suspicious attachment), while others are “Tier 2 confirmation” (account creation, admin group escalation, listening port, and file hash). The exercise reinforces that SOC investigations progress from weak indicators to high-confidence behaviours by correlating different sources and building a coherent narrative [6,7].
+
+Incident handling methodology relevance
+
+Using a standard lifecycle (Preparation → Detection & Analysis → Containment/Eradication/Recovery → Lessons Learned) [2], BOTSv3 demonstrates:
+
+The importance of Preparation (correct data onboarding and parsing) to enable accurate investigations.
+
+Detection & Analysis via SPL pivots across sourcetypes to validate malicious intent.
+
+Practical response implications, even in a simulation: disabling malicious accounts, removing persistence, isolating hosts, and blocking IoCs.
+
+Lessons learned through improved SOC rules (e.g., correlation of 4720 followed by privileged group adds) [5].
