@@ -174,3 +174,31 @@ Links to delivery in the kill chain.
 Drives response playbooks: attachment quarantine, user notification, and retroactive search (“who else received it?”).
 
 Triggers endpoint investigation to confirm whether the file was opened and executed.
+
+## Q3 — Suspicious executable associated with the XLSM event chain
+
+Answer - HxTsr.exe
+
+**SPL used**
+
+```spl
+index=botsv3 sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" xlsm
+```
+
+**Evidence**
+
+![Figure 6](figure-06.jpeg)
+
+*Figure 6 shows Sysmon context tying XLSM activity to the suspicious process indicator.*
+
+**Interpretation**
+
+Sysmon provides high-fidelity process and file telemetry used heavily in SOC detection engineering [3]. The association of the macro-enabled document chain with the executable HxTsr.exe strongly suggests an execution stage where malicious code drops or launches a payload.
+
+**SOC relevance**
+
+Enables threat hunting: search for HxTsr.exe across hosts and time windows.
+
+Supports containment: isolate the host exhibiting payload execution.
+
+Helps detection building: “Office document opened → unusual executable launched” rules are strong in real environments.
