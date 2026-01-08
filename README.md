@@ -64,3 +64,51 @@ controlled access (local web UI and lab-only access).
 *Figure 1 confirms the BotsV3 VM exists in Oracle VirtualBox.*
 
 ![Figure 2](figure-02.jpeg)
+*Figure 2 confirms Splunk is installed and accessible via the local web interface (127.0.0.1:8000), showing operational readiness for search and reporting.*
+
+## 3.2 Dataset onboarding and readiness criteria
+
+BOTSv3 ingestion was performed following the dataset workflow. In a real SOC context, onboarding quality is judged by
+
+events returning under the expected index,
+
+correct sourcetype mapping to enable proper field extraction,
+
+reliable timestamps for timeline analysis, and
+
+consistent field availability (e.g., EventCode, hashes, attachment metadata).
+
+A key point is in SOC investigations, data quality is part of incident quality. If event fields are missing or misparsed, analysts risk false conclusions (e.g., wrong times, wrong users, incorrect host attribution).
+
+## 3.3 Validation and quality checks (SOC-style)
+
+Before answering guided questions, a SOC analyst validates the dataset
+
+Index visibility
+
+```spl
+index=botsv3 | head 10
+```
+
+Core telemetry presence
+
+```spl
+index=botsv3 sourcetype="ms:o365:management" | head 5
+index=botsv3 sourcetype="stream:smtp" | head 5
+index=botsv3 sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" | head 5
+index=botsv3 sourcetype="WinEventLog:Security" | head 5
+index=botsv3 sourcetype="osquery:results" | head 5
+```
+
+Parsing/field sanity examples
+
+```spl
+index=botsv3 sourcetype="WinEventLog:Security" EventCode=4720
+| table _time host Account_Name EventCode
+index=botsv3 sourcetype="osquery:results"
+| table _time host name columns.cmdline columns.uid columns.owner_uid
+```
+
+Evidence of successful readiness
+
+The guided question screenshots (Figures 3–10) show events returned for each required sourcetype with meaningful fields displayed, indicating the dataset is usable for investigation.
