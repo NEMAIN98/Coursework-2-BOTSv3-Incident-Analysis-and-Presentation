@@ -421,3 +421,4 @@ Monitor for new listening ports and services on endpoints, especially when bound
 [9] Microsoft, “Audit Security Group Management - Windows 10,” learn.microsoft.com, Sep. 06, 2021. Available: https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management
 
 [10] MITRE Corporation, “Create Account, Technique T1136 - Enterprise | MITRE ATT&CK®,” attack.mitre.org, Dec. 14, 2017. Available: https://attack.mitre.org/techniques/T1136/
+# refresh
